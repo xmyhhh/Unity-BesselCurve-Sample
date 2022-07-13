@@ -7,7 +7,7 @@ using UnityEngine;
 public class BezierCurve : MonoBehaviour
 {
     public GameObject curveUI;
-    public int curveLen = 8;
+    int curveLen = 15;
     public GameObject dotPrefab;
     public GameObject curveDotPrefab;
 
@@ -26,7 +26,7 @@ public class BezierCurve : MonoBehaviour
     float p3Miny = 1.6f;
 
 
-    List<GameObject> pArray; //保存曲线的控制点
+    List<GameObject> pArray;
 
     List<GameObject> curveUIObject;
     void Start()
@@ -76,8 +76,9 @@ public class BezierCurve : MonoBehaviour
             curveUIObject[i].GetComponent<RectTransform>().anchoredPosition = Camera.main.WorldToScreenPoint((CubicBezier(p1, p2, p3, p4, t)));
             if (i >= 1)
             {
-                LookAt(curveUIObject[i], curveUIObject[i-1].GetComponent<RectTransform>().anchoredPosition);
+                LookAt(curveUIObject[i], curveUIObject[i - 1].GetComponent<RectTransform>().anchoredPosition, i);
             }
+
         }
     }
 
@@ -86,20 +87,23 @@ public class BezierCurve : MonoBehaviour
         for (int i = 0; i < curveLen; i++)
         {
             var obj = curveUI.transform.Find(i.ToString()).gameObject;
-            float scaleFctor = Mathf.Max((1.0f / curveLen) * (i + 1), 0.4f);
+            float scaleFctor = Mathf.Max((1.0f / curveLen) * (i + 1), 0.3f);
             obj.transform.localScale = new Vector3(scaleFctor, scaleFctor, scaleFctor);
             curveUIObject.Add(obj);
+
         }
 
     }
 
-    void LookAt(GameObject gameObject, Vector2 taregtPosition)
+    void LookAt(GameObject gameObject, Vector2 taregtPosition, int i)
     {
-        var newAxisY = (gameObject.GetComponent<RectTransform>().anchoredPosition - taregtPosition);
 
-        float rot_z = Vector2.Angle(gameObject.transform.up, newAxisY);
+        var newAxisY = (gameObject.GetComponent<RectTransform>().anchoredPosition - taregtPosition).normalized;
 
-        gameObject.transform.rotation = Quaternion.Euler(0f, 0f, rot_z - 90);
+
+        gameObject.transform.up = newAxisY;
+
+
     }
 
     Vector3 QuadraticBezier(Vector3 p0, Vector3 p1, Vector3 p2, float t)
